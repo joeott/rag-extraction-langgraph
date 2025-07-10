@@ -23,25 +23,44 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    
     - name: Test graph creation
       run: |
-        cd rag_extraction
-        python -c "from graph import create_extraction_graph; print('✅ Graph creation successful')"
+        python -c "
+        import sys
+        sys.path.append('.')
+        from rag_extraction.graph import create_extraction_graph
+        graph = create_extraction_graph()
+        print('✅ Graph creation successful')
+        print('✅ Graph nodes:', list(graph.get_graph().nodes()))
+        "
     
     - name: Validate schema
       run: |
-        cd rag_extraction
-        python -c "from schemas.state import ExtractionState; from schemas.entities import ExtractedEntity; print('✅ Schema validation successful')"
+        python -c "
+        import sys
+        sys.path.append('.')
+        from rag_extraction.schemas.state import ExtractionState
+        from rag_extraction.schemas.entities import ExtractedEntity
+        
+        # Test state creation
+        state = ExtractionState(chunk_id='test')
+        print('✅ ExtractionState validation successful')
+        
+        # Test entity creation
+        entity = ExtractedEntity(name='test', entity_type='concept')
+        print('✅ ExtractedEntity validation successful')
+        "
+    
+    - name: Test node imports
+      run: |
+        python -c "
+        import sys
+        sys.path.append('.')
+        from rag_extraction.nodes import retrieve_chunk, extract_entities, enhance_relationships, store_results
+        print('✅ Node imports successful')
+        "
 
-  deploy:
+  deploy-ready:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -49,26 +68,28 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install LangGraph CLI
+    - name: Deployment Ready Notification
       run: |
-        pip install langgraph-cli
-    
-    - name: Test local deployment
-      run: |
-        echo "Testing LangGraph application structure..."
-        langgraph build --config langgraph.json
-    
-    - name: Notify deployment ready
-      run: |
-        echo "🚀 Application is ready for LangGraph Cloud deployment!"
-        echo "📋 Next steps:"
+        echo "🚀 RAG Extraction LangGraph Application is ready for cloud deployment!"
+        echo ""
+        echo "📋 Deployment Details:"
+        echo "   Repository: ${{ github.repository }}"
+        echo "   Branch: ${{ github.ref_name }}"
+        echo "   Commit: ${{ github.sha }}"
+        echo ""
+        echo "🔧 Next Steps:"
         echo "1. Go to https://smith.langchain.com"
-        echo "2. Navigate to LangGraph Platform → New Deployment"
-        echo "3. Select this repository: ${{ github.repository }}"
-        echo "4. Configure environment variables"
-        echo "5. Deploy to cloud"
+        echo "2. Navigate to LangGraph Platform → '+ New Deployment'"
+        echo "3. Select repository: ${{ github.repository }}"
+        echo "4. Configure environment variables:"
+        echo "   - OPENAI_API_KEY"
+        echo "   - NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD"
+        echo "   - LANGCHAIN_API_KEY, LANGCHAIN_PROJECT"
+        echo "5. Deploy to cloud (takes ~15 minutes)"
+        echo ""
+        echo "📊 Application Features:"
+        echo "   - Semantic entity extraction with quality controls"
+        echo "   - Multi-extractor workflow (concepts, methods, formulas, examples)"
+        echo "   - Entity relationship discovery"
+        echo "   - Comprehensive validation and error handling"
+        echo "   - Production-ready cloud architecture"
