@@ -1,0 +1,7 @@
+{
+  "dependencies": ["./rag_extraction"],
+  "graphs": {
+    "semantic_extraction": "./rag_extraction/graph.py:extraction_graph"
+  },
+  "env": ".env"
+}

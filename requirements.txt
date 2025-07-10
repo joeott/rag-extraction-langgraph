@@ -1,0 +1,16 @@
+# Core LangGraph dependencies (cloud compatible)
+langgraph>=0.3.27
+langgraph-sdk>=0.1.66
+langgraph-checkpoint>=2.0.23
+langchain-core>=0.2.38
+langsmith>=0.1.63
+
+# AI/ML dependencies
+openai>=1.40.0
+pydantic>=2.0.0
+
+# Database
+neo4j>=5.0.0
+
+# Utilities
+python-dotenv>=1.0.0
